@@ -1,0 +1,8 @@
+proxy:
+  port: 8080
+  record:
+    type: file
+    path: ./db
+  log:
+    path: ./logs
+    

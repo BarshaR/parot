@@ -8,12 +8,15 @@ import (
 	"net/http/httputil"
 	"os"
 	"os/signal"
+	"parot/proxy/config"
 	"time"
 
 	"github.com/elazarl/goproxy"
 )
 
 func main() {
+	//TODO: load config here
+	config.LoadConfig()
 	parotCtx := ParotProxyContext{
 		startTime:      time.Now().UnixMilli(),
 		requestHandled: 0,
@@ -23,7 +26,7 @@ func main() {
 	proxy := goproxy.NewProxyHttpServer()
 	proxy.OnRequest().Do(&parotCtx)
 
-	server := http.Server{Addr: ":8080", Handler: proxy}
+	server := http.Server{Addr: ":8083", Handler: proxy}
 	go func() {
 		if err := server.ListenAndServe(); err != nil {
 			// handle err
