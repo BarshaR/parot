@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"net/http/httputil"
+	"os"
+	"os/signal"
 	"time"
 
 	"github.com/elazarl/goproxy"
@@ -19,7 +22,28 @@ func main() {
 
 	proxy := goproxy.NewProxyHttpServer()
 	proxy.OnRequest().Do(&parotCtx)
-	log.Fatal(http.ListenAndServe(":8080", proxy))
+
+	server := http.Server{Addr: ":8080", Handler: proxy}
+	go func() {
+		if err := server.ListenAndServe(); err != nil {
+			// handle err
+		}
+	}()
+	fmt.Printf("Proxy running on: %s\n", server.Addr)
+
+	// Setting up signal capturing
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt)
+	<-stop
+
+	fmt.Println("Shutting down Parot")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := server.Shutdown(ctx); err != nil {
+		// handle err
+	}
+	parotCtx.PrintSummary()
+
 }
 
 func requestInterceptLogger(r *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
@@ -51,6 +75,11 @@ func (proxyCtx *ParotProxyContext) Handle(req *http.Request, ctx *goproxy.ProxyC
 	proxyCtx.requestHandler.handleRequest(proxyCtx.requestHandled, delta, res)
 
 	return req, nil
+}
+
+func (proxyCtx ParotProxyContext) PrintSummary() {
+	totalRecTime := (time.Now().UnixMilli() - proxyCtx.startTime) / 1000
+	fmt.Printf("Recorded %d requests over %d seconds\n", proxyCtx.requestHandled, totalRecTime)
 }
 
 type LoggingReqHandler struct{}
