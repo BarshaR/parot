@@ -24,9 +24,7 @@ func LoadConfig() (config *Config, err error) {
 		}
 	}
 
-	if viper.IsSet("proxy.port") {
-		fmt.Println("proxy port value - ", viper.Get("proxy.port"))
-	}
+	// TODO: implement config validation to check existence etc
 
 	return &Config{}, err
 }
