@@ -1,7 +1,7 @@
 package config
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/spf13/viper"
 )
@@ -14,13 +14,11 @@ func LoadConfig() (config *Config, err error) {
 	viper.SetConfigName("parot.yaml")
 	viper.AddConfigPath(".")
 
-	fmt.Printf("Using config: %s\n", viper.ConfigFileUsed())
-
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			// Config file not found; ignore error if desired
+			log.Println("External configuration file not found")
 		} else {
-			// Config file was found but another error was produced
+			log.Println("External configuration file found but loaded with errors:", err)
 		}
 	}
 
@@ -37,6 +35,7 @@ func initDefaults() {
 type Config struct {
 }
 
+// TODO: privatise these methods and provide a struct to consumers instead
 func (config *Config) GetStringValue(key string) string {
 	return viper.GetString(key)
 }

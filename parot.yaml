@@ -1,4 +1,5 @@
 proxy:
+  hostname: localhost
   port: 8087
   record:
     type: file
@@ -6,4 +7,3 @@ proxy:
   log:
     path: ./logs
     level: debug
-    

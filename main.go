@@ -21,6 +21,7 @@ func main() {
 	}
 	// TODO: validate config values e.g port needs to be a valid int
 	port := config.GetStringValue("proxy.port")
+	hostname := config.GetStringValue("proxy.hostname")
 
 	parotCtx := ParotProxyContext{
 		startTime:      time.Now().UnixMilli(),
@@ -31,13 +32,13 @@ func main() {
 	proxy := goproxy.NewProxyHttpServer()
 	proxy.OnRequest().Do(&parotCtx)
 
-	server := http.Server{Addr: ":" + port, Handler: proxy}
+	server := http.Server{Addr: hostname + ":" + port, Handler: proxy}
 	go func() {
 		if err := server.ListenAndServe(); err != nil {
 			// handle err
 		}
 	}()
-	fmt.Printf("Proxy running on: %s\n", server.Addr)
+	log.Printf("Proxy running on: %s\n", server.Addr)
 
 	// Setting up signal capturing
 	stop := make(chan os.Signal, 1)
@@ -48,24 +49,15 @@ func main() {
 
 func handleShutdown(msg string, parotCtx *ParotProxyContext, server *http.Server) {
 	if msg != "" {
-		fmt.Println(msg)
+		log.Println(msg)
 	}
-	fmt.Println("Shutting down Parot")
+	log.Println("Shutting down Parot")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := server.Shutdown(ctx); err != nil {
 		// handle err
 	}
 	parotCtx.PrintSummary()
-}
-
-func requestInterceptLogger(r *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
-	res, err := httputil.DumpRequest(r, true)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Print(string(res))
-	return r, nil
 }
 
 type ParotRequestHandler interface {
