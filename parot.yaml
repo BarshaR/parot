@@ -1,0 +1,9 @@
+proxy:
+  hostname: localhost
+  port: 8087
+  record:
+    type: file
+    path: ./db
+  log:
+    path: ./logs
+    level: debug
