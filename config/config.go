@@ -50,7 +50,7 @@ type Config struct {
 
 // Unmarshal to config model
 func unmarshalConfig(config *Config) error {
-	// TODO: Add more stringent validation
+	// TODO: Add more stringent validation and think of a much nicer way to do this
 
 	if port := viper.GetInt("proxy.port"); port > 0 {
 		config.ProxyPort = strconv.Itoa(port)
