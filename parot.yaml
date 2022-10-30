@@ -1,9 +1,17 @@
 proxy:
   hostname: localhost
   port: 8087
-  record:
+  persist:
     type: file
-    path: ./db
+    file:
+      path: ./db
+    database:
+      type: postgres
+      name: mydb
+      hostname: localhost
+      port: 8081
+      user: mydb_user
+      password: password
   log:
     path: ./logs
     level: debug

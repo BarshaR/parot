@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -17,11 +18,8 @@ import (
 func main() {
 	config, err := config.LoadConfig()
 	if err != nil {
-		// TODO: handleShutdown()
+		handleForceShutdown("Error loading configuration: " + err.Error())
 	}
-	// TODO: validate config values e.g port needs to be a valid int
-	port := config.GetStringValue("proxy.port")
-	hostname := config.GetStringValue("proxy.hostname")
 
 	parotCtx := ParotProxyContext{
 		startTime:      time.Now().UnixMilli(),
@@ -32,19 +30,19 @@ func main() {
 	proxy := goproxy.NewProxyHttpServer()
 	proxy.OnRequest().Do(&parotCtx)
 
-	server := http.Server{Addr: hostname + ":" + port, Handler: proxy}
+	server := http.Server{Addr: config.ProxyHostname + ":" + config.ProxyPort, Handler: proxy}
 	go func() {
-		if err := server.ListenAndServe(); err != nil {
-			// handle err
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			handleShutdown(err.Error(), &parotCtx, &server)
 		}
+
 	}()
 	log.Printf("Proxy running on: %s\n", server.Addr)
-
 	// Setting up signal capturing
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 	<-stop
-	handleShutdown("\nSIGINT Received", &parotCtx, &server)
+	handleShutdown("SIGINT Received", &parotCtx, &server)
 }
 
 func handleShutdown(msg string, parotCtx *ParotProxyContext, server *http.Server) {
@@ -55,9 +53,19 @@ func handleShutdown(msg string, parotCtx *ParotProxyContext, server *http.Server
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := server.Shutdown(ctx); err != nil {
-		// handle err
+		log.Println("Error shutting down server:", err.Error())
 	}
 	parotCtx.PrintSummary()
+}
+
+func handleForceShutdown(msg string) {
+	if msg != "" {
+		log.Println(msg)
+	} else {
+		log.Println("Fatal error!")
+	}
+	log.Println("Forcing Shutdown")
+	os.Exit(1)
 }
 
 type ParotRequestHandler interface {
