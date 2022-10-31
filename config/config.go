@@ -114,7 +114,7 @@ var configOptions = []ConfigOption{
 	},
 	{
 		Key:          "proxy.persist",
-		DefaultValue: "false",
+		DefaultValue: "",
 		Description:  "Enable persistence of proxy requests",
 		Required:     false,
 	},
@@ -126,7 +126,7 @@ var configOptions = []ConfigOption{
 	},
 	{
 		Key:          "proxy.persist.file",
-		DefaultValue: "./db",
+		DefaultValue: "",
 		Description:  "Persist proxy requests to file sytem",
 		Required:     false,
 	},
@@ -137,15 +137,15 @@ var configOptions = []ConfigOption{
 		Required:     false,
 	},
 	{
-		Key:         "proxy.persist.database.name",
-		Description: "Relational database flavour",
-		Required:    true,
+		Key:         "proxy.persist.database",
+		Description: "Persist proxy request to relational database",
+		Required:    false,
 	},
 	{
-		Key:          "proxy.persist.database.name",
-		DefaultValue: "parotdb",
-		Description:  "Database name",
-		Required:     false,
+		Key:           "proxy.persist.database.name",
+		Description:   "Relational database flavour",
+		Required:      false,
+		AllowedValues: []string{"postgres", "mysql", "h2"},
 	},
 	{
 		Key:          "proxy.persist.database.hostname",
@@ -155,8 +155,8 @@ var configOptions = []ConfigOption{
 	},
 	{
 		Key:          "proxy.persist.database.port",
-		DefaultValue: "8",
-		Description:  "Database name",
+		DefaultValue: "8069",
+		Description:  "Database port",
 		Required:     true,
 	},
 }
