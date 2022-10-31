@@ -78,8 +78,46 @@ Parot is written in Go.
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-TBC
+Run the proxy in pass through mode using internal configuration default values
 
+```sh
+go run parot.go
+```
+
+Define custom configuration
+```yaml
+proxy:
+  hostname: localhost
+  port: 8087
+
+```
+
+Enable persistence of requests to the file system
+```yaml
+proxy:
+  hostname: localhost
+  port: 8087
+  persist:
+    type: file
+    file:
+      path: ./db
+
+```
+
+Enable persistence of requests to a relational database
+```yaml
+proxy:
+  hostname: localhost
+  port: 8087
+  persist:
+    database:
+      type: postgres
+      name: mydb
+      hostname: localhost
+      port: 8081
+      user: mydb_user
+      password: password
+```
 
 <!-- CONTRIBUTING -->
 ## Contributing
